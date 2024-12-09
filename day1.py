@@ -1,7 +1,7 @@
 from collections import Counter
 col_A,col_B=[],[]
-# with open('sample1.txt', 'r') as file:
-with open('input1.txt', 'r') as file:
+# with open('sample/sample1.txt', 'r') as file:
+with open('input/input1.txt', 'r') as file:
     for line in file:
         columns = line.strip().split()  # Split the line into columns
         if len(columns) >= 2:
