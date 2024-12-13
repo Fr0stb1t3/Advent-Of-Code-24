@@ -59,6 +59,7 @@ def calculate(equation,part2=False):
         return 0
 total_tokens_p1=0
 total_tokens_p2=0
+print("Number of Sections:",(len(lines)//3))
 for i in range(0,len(lines),3):
     equation=section(lines[i],lines[i+1],lines[i+2])
     # print(equation)
