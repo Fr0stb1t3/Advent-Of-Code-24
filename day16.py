@@ -1,6 +1,6 @@
 from collections import defaultdict
 import heapq
-
+import os,time
 with open("input/input16.txt") as f:
 # with open("sample/sample16.txt") as f:
     grid=f.read().splitlines()
@@ -64,8 +64,15 @@ while len(stack)>0:
         if other  not in good_nodes:
             good_nodes.add(other)
             stack.append(other)
+    ## Print gird trace in real time
+    # os.system('cls' if os.name == 'nt' else 'clear')
+    # print("\n" * 100)
+    # temp_node=set(x[:2] for x in good_nodes)
+    # visual = "\n".join("".join(grid[i][j] if (i,j) not in temp_node else "\033[32m0\033[0m" for j in range(m)) for i in range(n))
+    # print(visual)
+    # time.sleep(0.1)
 good_nodes= set(x[:2] for x in good_nodes)
-print("Part 2",len(good_nodes))
+print("Part 2: ",len(good_nodes))
 
 ### Visualization of Final path
 visual = "\n".join("".join(grid[i][j] if (i,j) not in good_nodes else "\033[32m0\033[0m" for j in range(m)) for i in range(n))
