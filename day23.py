@@ -6,14 +6,13 @@ with open("input/input23.txt") as f:
 # with open("sample/sample23.txt") as f:
     input_feed=f.read().splitlines()
 
-g=dd(set)
-for l in input_feed:
-    a,b=l.split("-")
-    g[a].add(b)
-    g[b].add(a)
 @timer
-def part1():
-    
+def part1():    
+    g=dd(set)
+    for l in input_feed:
+        a,b=l.split("-")
+        g[a].add(b)
+        g[b].add(a)
     sol=0
     for a in g.keys():
         ag=a.startswith("t")
@@ -30,6 +29,7 @@ def part1():
                         # print(a,b,c)
                         sol+=1
     print("Part 1:",sol)
+    return g
 @timer
 def part2():
     # Using networkx for the find_cliques:
@@ -47,7 +47,7 @@ def part2():
             # print(len(maxC))
     
     print("Part 2:",",".join(sorted(maxC)))
-
+    return g2
 
 part1()
 part2()
