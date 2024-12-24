@@ -1,0 +1,134 @@
+from collections import defaultdict as dd
+from library import timer
+from pprint import pprint
+with open("input/input24.txt") as f:
+# with open("sample/sample24.txt") as f:
+    initial_registers,actions=f.read().split("\n\n")
+    inps = {z.split(':')[0]: int(z.split(':')[1].strip()) for z in initial_registers.split('\n')} # For graph visualization
+    ops = [op.split(' ') for op in actions.split('\n')] # For graph visualization
+    initial_registers=initial_registers.splitlines()
+    actions = actions.splitlines()
+    
+registers=dd(int)
+for i in initial_registers:
+    key,val=i.split(": ")
+    registers[key] = int(val.strip())
+
+split_action=dd(list)
+for j in actions:
+    action,result = j.split(" -> ")
+    action=action.split()
+    split_action[result] = action
+
+def find_result_of_action(graph,reg,key):
+    if key in reg:
+        return True,reg
+    r1,action,r2=graph[key]
+    if r1 in reg and r2 in reg:
+        if action == "OR":
+            res = reg[r1] or reg[r2]
+        elif action == "AND":
+            res = reg[r1] and reg[r2]
+        elif action == "XOR":
+            res = reg[r1] ^ reg[r2]
+        reg[key] = res
+        return True,reg
+    return False,reg
+
+def get_all_register_vals(graph,reg):
+    flag=False
+    while not flag:
+        count=0
+        for key in graph.keys():
+            act,reg = find_result_of_action(graph,reg,key)
+            if act:
+                count+=1
+        if count == len(graph.keys()):
+            flag=True
+            break
+    return reg
+
+def visualize():
+    import graphviz
+
+    # Create a new directed graph
+    dot = graphviz.Digraph(format='png', engine='dot')
+
+    # Add operand nodes (inputs/outputs) as circles
+    for var in inps:
+        dot.node(var, var, shape='circle')  # Circle shape for operands
+
+    # Add operations as nodes (operators in boxes)
+    for op in ops:
+        input1, gate, input2, _, output = op
+
+        # Create gate node in a box
+        gate_label = f'{gate}'
+        gate_name = f'{input1}_{input2}_{gate}'  # Unique gate name
+        dot.node(gate_name, gate_label, shape='box')  # Box shape for operators
+
+        # Connect inputs to gate
+        dot.edge(input1, gate_name)
+        dot.edge(input2, gate_name)
+
+        # Connect gate to output
+        dot.node(output, output, shape='circle')  # Output node as circle
+        dot.edge(gate_name, output)
+
+    # Render the graph to a file
+    output_path = 'day_24_aoc_circuit_graph'
+    dot.render(output_path)  # Saves the output to 'circuit_graph.png'
+
+    #Generate SVP from here if render throws error: https://dreampuf.github.io/GraphvizOnline/
+    
+@timer
+def part1():
+    global split_action,registers,highest_z
+    # pprint(registers)
+    registers = get_all_register_vals(graph=split_action,reg=registers)
+    # pprint(registers)
+    zArr=[]
+    for key,val in registers.items():
+        if key.startswith("z"):
+            zArr.append((key,val))
+    zArr.sort()
+    # print(len(zArr),zArr)
+    sol= ""
+    for (key,val) in zArr:
+        sol = str(val)+sol
+    
+    print("Binary value of z's:",sol)
+    print("Integer value of z's:",int(sol,2))
+    # print("0011111101000")
+    highest_z=zArr[-1][0]
+
+@timer
+def part2():
+    global split_action,registers,highest_z
+    # print(highest_z)
+    wrong = set()
+    for res,(op1,op,op2) in split_action.items():
+        if res.startswith("z") and op != "XOR" and res != highest_z:
+            wrong.add(res)
+        if (
+            op == "XOR"
+            and res[0] not in ["x", "y", "z"]
+            and op1[0] not in ["x", "y", "z"]
+            and op2[0] not in ["x", "y", "z"]
+        ):
+            wrong.add(res)
+        if op == "AND" and "x00" not in [op1, op2]:
+            for subres,(subop1,subop,subop2) in split_action.items():
+                if (res == subop1 or res == subop2) and subop != "OR":
+                    wrong.add(res)
+        if op == "XOR" :
+            for subres,(subop1,subop,subop2) in split_action.items():
+                if (res == subop1 or res == subop2) and subop == "OR":
+                    wrong.add(res)
+    # print(wrong)
+    print("Part 2 [wrong wires]:",",".join(sorted(wrong)))
+
+
+part1()
+part2()
+# visualize()
